@@ -2,7 +2,7 @@ package ru.practicum.moviehub.http;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-//import ru.practicum.moviehub.model.ErrorResponse;
+import ru.practicum.moviehub.api.ErrorResponse;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -41,15 +41,13 @@ public abstract class BaseHttpHandler implements HttpHandler {
         ex.close();
     }
 
-    // ????
     protected void sendJson(HttpExchange ex, int status, Object body) throws IOException {
         sendJson(ex, status, gson.toJson(body));
     }
 
-    /*
     protected void sendError(HttpExchange ex, int status, String message) throws IOException {
         sendJson(ex, status, new ErrorResponse(message));
-    }*/
+    }
 
     protected boolean isJsonContentType(HttpExchange ex) {
         List<String> headers = ex.getRequestHeaders().get(CT_HEADER);

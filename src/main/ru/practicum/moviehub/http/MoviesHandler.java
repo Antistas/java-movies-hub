@@ -26,20 +26,25 @@ public class MoviesHandler extends BaseHttpHandler {
             String path = ex.getRequestURI().getPath();
             String method = ex.getRequestMethod();
 
-            if ("/movies".equals(path) || "/movies/".equals(path)) {
-                handleCollection(ex, method);
-                return;
-            }
+            List<String> params = Arrays.stream(path.split("/"))
+                    .filter(s -> !s.isBlank())
+                    .toList();
 
-            if (path.startsWith("/movies/")) {
-                handleItem(ex, method, path);
-                return;
+            if (params.getFirst().equals("movies")) {
+                if (params.size() == 1) {
+                    handleCollection(ex, method);
+                    return;
+                } else {
+                    String id = params.get(1);
+                    handleItem(ex, method, id);
+                    return;
+                }
+            } else {
+                sendError(ex, 500, "Внутренняя ошибка сервера");
             }
-
-            //sendError(ex, 404, "Не найдено");
+            return;
         } catch (Exception e) {
-            // на этапе скелета пусть будет 500
-            //sendError(ex, 500, "Внутренняя ошибка сервера");
+            sendError(ex, 500, "Внутренняя ошибка сервера");
         }
     }
 
@@ -47,31 +52,29 @@ public class MoviesHandler extends BaseHttpHandler {
         switch (method) {
             case METHOD_GET -> handleGetMovies(ex);
             case METHOD_POST -> handlePostMovie(ex);
-            //default -> sendError(ex, 405, "Method Not Allowed");
+            default -> sendError(ex, 405, "Method Not Allowed");
         }
     }
 
-    private void handleItem(HttpExchange ex, String method, String path) throws IOException {
-
-        String idStr = path.substring("/movies/".length());
-
+    private void handleItem(HttpExchange ex, String method, String idStr) throws IOException {
         long id;
         try {
             id = Long.parseLong(idStr);
         } catch (NumberFormatException nfe) {
-            //sendError(ex, 400, "Некорректный ID");
+            sendError(ex, 400, "Некорректный ID = " + idStr);
             return;
         }
 
         switch (method) {
             case METHOD_GET -> handleGetMovieById(ex, id);
             case METHOD_DELETE -> handleDeleteMovie(ex, id);
-            //default -> sendError(ex, 405, "Method Not Allowed");
+            default -> sendError(ex, 405, "Method Not Allowed");
         }
     }
 
     private void handleGetMovies(HttpExchange ex) throws IOException {
         Map<String, String> params = parseQuery(ex.getRequestURI());
+
         if (params.isEmpty()) {
             sendJson(ex, 200, store.findAll());
         } else {
@@ -80,8 +83,7 @@ public class MoviesHandler extends BaseHttpHandler {
                 sendJson(ex, 200, store.findByYear(year));
                 return;
             } catch (NumberFormatException e) {
-                System.out.println("Некорректный год");
-                //sendJson(ex, 200, store.findByYear(year));
+                sendJson(ex, 400, "Некорректный параметр - " + params.get("year"));
                 return;
             }
         }
@@ -156,7 +158,7 @@ public class MoviesHandler extends BaseHttpHandler {
     private void handleGetMovieById(HttpExchange ex, long id) throws IOException {
         Optional<Movie> found = store.findById(id);
         if (found.isEmpty()) {
-            //sendError(ex, 404, "Фильм не найден");
+            sendError(ex, 404, "Фильм не найден");
             return;
         }
         sendJson(ex, 200, found.get());
