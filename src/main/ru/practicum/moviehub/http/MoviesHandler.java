@@ -1,6 +1,7 @@
 package ru.practicum.moviehub.http;
 
 import com.sun.net.httpserver.HttpExchange;
+import ru.practicum.moviehub.AppLogger;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
@@ -14,18 +15,21 @@ import java.util.stream.Collectors;
 
 public class MoviesHandler extends BaseHttpHandler {
     private final MoviesStore store;
+    private final AppLogger sysLog;
 
-    public MoviesHandler(MoviesStore store) {
+    public MoviesHandler(MoviesStore store, AppLogger log) {
         super();
         this.store = store;
+        this.sysLog = log;
     }
 
     @Override
     public void handle(HttpExchange ex) throws IOException {
         try {
+            sysLog.info("Запрос: " + ex.getRequestURI().toString() + ", метод:" + ex.getRequestMethod());
+
             String path = ex.getRequestURI().getPath();
             String method = ex.getRequestMethod();
-
             List<String> params = Arrays.stream(path.split("/"))
                     .filter(s -> !s.isBlank())
                     .toList();
@@ -33,17 +37,17 @@ public class MoviesHandler extends BaseHttpHandler {
             if (params.getFirst().equals("movies")) {
                 if (params.size() == 1) {
                     handleCollection(ex, method);
-                    return;
                 } else {
                     String id = params.get(1);
                     handleItem(ex, method, id);
-                    return;
                 }
             } else {
+                sysLog.warn("Внутренняя ошибка сервера");
                 sendError(ex, 500, "Внутренняя ошибка сервера");
             }
-            return;
+
         } catch (Exception e) {
+            sysLog.error("Внутренняя ошибка сервера", e);
             sendError(ex, 500, "Внутренняя ошибка сервера");
         }
     }
@@ -61,6 +65,7 @@ public class MoviesHandler extends BaseHttpHandler {
         try {
             id = Long.parseLong(idStr);
         } catch (NumberFormatException nfe) {
+            sysLog.warn("Некорректный ID = " + idStr);
             sendError(ex, 400, "Некорректный ID = " + idStr);
             return;
         }
@@ -81,10 +86,9 @@ public class MoviesHandler extends BaseHttpHandler {
             try {
                 int year = Integer.parseInt(params.get("year"));
                 sendJson(ex, 200, store.findByYear(year));
-                return;
             } catch (NumberFormatException e) {
+                sysLog.error("Некорректный параметр - " + params.get("year"), e);
                 sendJson(ex, 400, "Некорректный параметр - " + params.get("year"));
-                return;
             }
         }
     }
@@ -158,6 +162,7 @@ public class MoviesHandler extends BaseHttpHandler {
     private void handleGetMovieById(HttpExchange ex, long id) throws IOException {
         Optional<Movie> found = store.findById(id);
         if (found.isEmpty()) {
+            sysLog.warn("Фильм не найден");
             sendError(ex, 404, "Фильм не найден");
             return;
         }
