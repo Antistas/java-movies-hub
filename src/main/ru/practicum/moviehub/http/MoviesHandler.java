@@ -1,7 +1,12 @@
 package ru.practicum.moviehub.http;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import ru.practicum.moviehub.AppLogger;
+import ru.practicum.moviehub.api.ErrorResponse;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
@@ -16,6 +21,7 @@ import java.util.stream.Collectors;
 public class MoviesHandler extends BaseHttpHandler {
     private final MoviesStore store;
     private final AppLogger sysLog;
+    private static int MIN_YEAR = 1888;
 
     public MoviesHandler(MoviesStore store, AppLogger log) {
         super();
@@ -88,7 +94,7 @@ public class MoviesHandler extends BaseHttpHandler {
                 sendJson(ex, 200, store.findByYear(year));
             } catch (NumberFormatException e) {
                 sysLog.error("Некорректный параметр - " + params.get("year"), e);
-                sendJson(ex, 400, "Некорректный параметр - " + params.get("year"));
+                sendError(ex, 400, "Некорректный параметр - " + params.get("year"));
             }
         }
     }
@@ -110,51 +116,75 @@ public class MoviesHandler extends BaseHttpHandler {
 
     private void handlePostMovie(HttpExchange ex) throws IOException {
         if (!isJsonContentType(ex)) {
-            //sendError(ex, 415, "Unsupported Media Type");
+            sendError(ex, 415, "Unsupported Media Type");
             return;
         }
 
         String body = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-
-        Movie incoming;
+        sysLog.info("Body" + body.replaceAll("\\s+", " ").trim());
 
         try {
-            //incoming = gson.fromJson(body, Movie.class);
-        } catch (Exception e) {
-            //sendError(ex, 400, "Некорректный JSON");
-            return;
-        }
+            JsonElement root = JsonParser.parseString(body);
 
-        List<String> errors = new ArrayList<>(); //validate(incoming);
-        if (!errors.isEmpty()) {
-            //sendJson(ex, 422, new ru.practicum.moviehub.model.ErrorResponse("Ошибка валидации", errors));
-            return;
-        }
+            if (!root.isJsonObject()) {
+                sysLog.warn("Ошибка валидации: ожидался JSON-объект");
+                sendJson(ex, 422, new ErrorResponse("Ошибка валидации", List.of("ожидался JSON-объект")));
+                return;
+            }
 
-        //Movie created = store.create(incoming.getTitle(), incoming.getYear());
-        //sendJson(ex, 201, created);
+            JsonObject obj = root.getAsJsonObject();
+            List<String> errors = validate(obj);
+
+            if (!errors.isEmpty()) {
+                sysLog.warn("Ошибка валидации:" + errors.toString());
+                sendJson(ex, 422, new ErrorResponse("Ошибка валидации", errors));
+                return;
+            }
+
+            int year = obj.get("year").getAsInt();
+            String title = obj.get("title").getAsString();
+            Movie newMovie = store.create(title, year);
+            sysLog.info("Добавлен фильм:" + newMovie.toString());
+            sendJson(ex, 201, newMovie);
+        } catch (JsonSyntaxException e) {
+            sendError(ex, 400, "Некорректный JSON");
+        }
     }
 
-    private List<String> validate(Movie m) {
+    private List<String> validate(JsonObject object) {
 
         List<String> errors = new ArrayList<>();
 
-        if (m == null) {
-            errors.add("тело запроса пустое");
-            return errors;
+        String title = null;
+        if (!object.has("title") || object.get("title").isJsonNull()) {
+            errors.add("Название не должно быть пустым");
+        } else if (!object.get("title").isJsonPrimitive() || !object.get("title").getAsJsonPrimitive().isString()) {
+            errors.add("title должен быть строкой");
+        } else {
+            title = object.get("title").getAsString();
+            if (title.isBlank())
+                errors.add("Название не должно быть пустым");
+            if (title.length() > 100)
+                errors.add("Название должно быть не длиннее 100 символов");
         }
 
-        String title = m.getTitle();
-
-        if (title == null || title.isBlank())
-            errors.add("название не должно быть пустым");
-        if (title != null && title.length() > 100)
-            errors.add("название должно быть не длиннее 100 символов");
-
-        int year = m.getYear();
-        int maxYear = Year.now().getValue() + 1;
-        if (year < 1888 || year > maxYear)
-            errors.add("год должен быть между 1888 и " + maxYear);
+        Integer year = null;
+        if (!object.has("year") || object.get("year").isJsonNull()) {
+            errors.add("Год должен быть указан");
+        } else if (!object.get("year").isJsonPrimitive() || !object.get("year").getAsJsonPrimitive().isNumber()) {
+            errors.add("Год должен быть числом");
+        } else {
+            try {
+                year = object.get("year").getAsInt(); // упадёт, если 1991.5
+            } catch (NumberFormatException | UnsupportedOperationException e) {
+                errors.add("Год должен быть целым числом");
+            }
+            if (year != null) {
+                int maxYear = Year.now().getValue() + 1;
+                if (year < MIN_YEAR || year > maxYear)
+                    errors.add("Год должен быть между " + MIN_YEAR + " и " + maxYear);
+            }
+        }
 
         return errors;
     }

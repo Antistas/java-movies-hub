@@ -19,7 +19,6 @@ public class MoviesServer {
             sysLog = AppLogger.system(SYSTEM_LOG);
             final AppLogger log = sysLog;
             log.info("MovieHub started.");
-
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/movies", new MoviesHandler(ms, sysLog));
 
