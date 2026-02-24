@@ -12,7 +12,7 @@ public class MoviesServer {
     private final HttpServer server;
     static final String SYSTEM_LOG = "src/logs/movieHubApp.log";
     AppLogger sysLog = null;
-    private MoviesStore ms;
+    private final MoviesStore  ms;
 
     public MoviesServer(MoviesStore ms, int port) {
         this.ms = ms;

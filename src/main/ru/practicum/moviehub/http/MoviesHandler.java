@@ -29,12 +29,6 @@ public class MoviesHandler extends BaseHttpHandler {
         this.sysLog = log;
     }
 
-    public MoviesHandler(AppLogger log) {
-        super();
-        this.store = new MoviesStore();
-        this.sysLog = log;
-    }
-
     @Override
     public void handle(HttpExchange ex) throws IOException {
         try {
@@ -158,7 +152,7 @@ public class MoviesHandler extends BaseHttpHandler {
             List<String> errors = validate(obj);
 
             if (!errors.isEmpty()) {
-                sysLog.warn("Ошибка валидации:" + errors.toString());
+                sysLog.warn("Ошибка валидации:" + errors);
                 sendJson(ex, 422, new ErrorResponse("Ошибка валидации", errors));
                 return;
             }
@@ -177,7 +171,7 @@ public class MoviesHandler extends BaseHttpHandler {
 
         List<String> errors = new ArrayList<>();
 
-        String title = null;
+        String title;
         if (!object.has("title") || object.get("title").isJsonNull()) {
             errors.add("Название не должно быть пустым");
         } else if (!object.get("title").isJsonPrimitive() || !object.get("title").getAsJsonPrimitive().isString()) {
