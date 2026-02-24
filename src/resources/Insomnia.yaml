@@ -1,0 +1,297 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: MovieHub
+meta:
+  id: wrk_cf8f7d8759394888b94e7997eae7de87
+  created: 1771839840525
+  modified: 1771839840525
+  description: ""
+collection:
+  - url: localhost:8080/movies
+    name: GetAllMovies
+    meta:
+      id: req_9584c55b25574fbf9cb35fe45c5dad33
+      created: 1771839868073
+      modified: 1771840050657
+      isPrivate: false
+      description: ""
+      sortKey: -1771839868073
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies/5
+    name: GetMovie5
+    meta:
+      id: req_8d32b6a31f724321b1737b049c99e661
+      created: 1771839898711
+      modified: 1771877565829
+      isPrivate: false
+      description: ""
+      sortKey: -1771839898711
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies/
+    name: GetAllMovies2
+    meta:
+      id: req_8786dab1173d48beb7332d395b5ac5e5
+      created: 1771839929456
+      modified: 1771877567894
+      isPrivate: false
+      description: ""
+      sortKey: -1771839929456
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies
+    name: getMovieYearParameter
+    meta:
+      id: req_f672e96505ac4f9786a4b1dba4f02e5e
+      created: 1771839963337
+      modified: 1771877378675
+      isPrivate: false
+      description: ""
+      sortKey: -1771839963337
+    method: GET
+    parameters:
+      - name: year
+        value: "1995"
+        description: ""
+        disabled: false
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies/300
+    name: GetMovie300
+    meta:
+      id: req_85d5609a4f674369b247ed1b2e5376ce
+      created: 1771840231169
+      modified: 1771877445529
+      isPrivate: false
+      description: ""
+      sortKey: -1771839883392
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies
+    name: getMovieIncorrectYear
+    meta:
+      id: req_a4e53819e1a64dccb0438650fe333b01
+      created: 1771859309035
+      modified: 1771877613682
+      isPrivate: false
+      description: ""
+      sortKey: -1771839946396.5
+    method: GET
+    parameters:
+      - name: year
+        value: "1300"
+        description: ""
+        disabled: false
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies
+    name: getMovieIncorrectYearValue
+    meta:
+      id: req_05ec80e3f9a34d96b969134e4a36af81
+      created: 1771859363394
+      modified: 1771877609433
+      isPrivate: false
+      description: ""
+      sortKey: -1771839937926.25
+    method: GET
+    parameters:
+      - name: year
+        value: abs
+        description: ""
+        disabled: false
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies
+    name: addNewFilm
+    meta:
+      id: req_062015069d82440c91f710ecea8d5458
+      created: 1771878085186
+      modified: 1771917480303
+      isPrivate: false
+      description: ""
+      sortKey: -1771878085186
+    method: POST
+    body:
+      mimeType: application/json
+      text: "[{
+
+        \t\"title\": \"Film\",
+
+        \t\"year\": 1991
+
+        },
+
+        \ {
+
+        \t\"title\": \"Film\",
+
+        \t\"year\": 1991
+
+        }]
+
+        \ "
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies
+    name: addNewFilmWithEmptyTitle
+    meta:
+      id: req_8328937b1fbe433ab547b8eac4a472bc
+      created: 1771878522973
+      modified: 1771944409145
+      isPrivate: false
+      description: ""
+      sortKey: -1771859024261.5
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"title": "",
+        	"year": 2026
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/movies/1
+    name: deleteFilm
+    meta:
+      id: req_b0b95d43e66245f99dc4a533621d3cb6
+      created: 1771917230426
+      modified: 1771917280503
+      isPrivate: false
+      description: ""
+      sortKey: -1771917230426
+    method: DELETE
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.1
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_619a83f056d978c7c8d88b452fc9db8b6ae326ab
+    created: 1771839840527
+    modified: 1771839840527
+environments:
+  name: Base Environment
+  meta:
+    id: env_619a83f056d978c7c8d88b452fc9db8b6ae326ab
+    created: 1771839840526
+    modified: 1771839840526
+    isPrivate: false
