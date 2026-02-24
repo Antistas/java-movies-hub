@@ -31,7 +31,6 @@ public class MoviesStore {
         return movie;
     }
 
-    // Переделать?
     public boolean delete(long id) {
         return movies.remove(id) != null;
     }

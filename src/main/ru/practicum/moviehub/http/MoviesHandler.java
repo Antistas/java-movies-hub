@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class MoviesHandler extends BaseHttpHandler {
     private final MoviesStore store;
     private final AppLogger sysLog;
-    private static int MIN_YEAR = 1888;
+    private static final int MIN_YEAR = 1888;
 
     public MoviesHandler(MoviesStore store, AppLogger log) {
         super();
@@ -38,25 +38,39 @@ public class MoviesHandler extends BaseHttpHandler {
     @Override
     public void handle(HttpExchange ex) throws IOException {
         try {
-            sysLog.info("Запрос: " + ex.getRequestURI().toString() + ", метод:" + ex.getRequestMethod());
+            sysLog.info("Запрос: " + ex.getRequestMethod() + " " + ex.getRequestURI());
 
             String path = ex.getRequestURI().getPath();
             String method = ex.getRequestMethod();
-            List<String> params = Arrays.stream(path.split("/"))
+
+            List<String> parts = Arrays.stream(path.split("/"))
                     .filter(s -> !s.isBlank())
                     .toList();
 
-            if (params.getFirst().equals("movies")) {
-                if (params.size() == 1) {
-                    handleCollection(ex, method);
-                } else {
-                    String id = params.get(1);
-                    handleItem(ex, method, id);
-                }
-            } else {
-                sysLog.warn("Внутренняя ошибка сервера");
-                sendError(ex, 500, "Внутренняя ошибка сервера");
+            if (parts.isEmpty()) {
+                sysLog.warn("Не найдено: " + path);
+                sendError(ex, 404, "Не найдено");
+                return;
             }
+
+            if (!"movies".equals(parts.get(0))) {
+                sysLog.warn("Не найдено: " + path);
+                sendError(ex, 404, "Не найдено");
+                return;
+            }
+
+            if (parts.size() == 1) {
+                handleCollection(ex, method);
+                return;
+            }
+
+            if (parts.size() == 2) {
+                handleItem(ex, method, parts.get(1));
+                return;
+            }
+
+            sysLog.warn("Не найдено: " + path);
+            sendError(ex, 404, "Не найдено");
 
         } catch (Exception e) {
             sysLog.error("Внутренняя ошибка сервера", e);
@@ -127,7 +141,9 @@ public class MoviesHandler extends BaseHttpHandler {
         }
 
         String body = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-        sysLog.info("Body" + body.replaceAll("\\s+", " ").trim());
+        String compact = body.replaceAll("\\s+", " ").trim();
+        String preview = compact.length() > 1000 ? compact.substring(0, 1000) + "..." : compact;
+        sysLog.info("Body: " + preview);
 
         try {
             JsonElement root = JsonParser.parseString(body);
