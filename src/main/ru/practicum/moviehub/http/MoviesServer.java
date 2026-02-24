@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 
 public class MoviesServer {
     private final HttpServer server;
-    static final String SYSTEM_LOG = "src/logs/movieHubApp.log";
+    static final String SYSTEM_LOG = "movieHubApp.log";
     AppLogger sysLog = null;
     private final MoviesStore  ms;
 
