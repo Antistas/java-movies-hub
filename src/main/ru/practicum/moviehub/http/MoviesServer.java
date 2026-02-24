@@ -12,16 +12,16 @@ public class MoviesServer {
     private final HttpServer server;
     static final String SYSTEM_LOG = "src/logs/movieHubApp.log";
     AppLogger sysLog = null;
+    private MoviesStore ms;
 
     public MoviesServer(MoviesStore ms, int port) {
-
+        this.ms = ms;
         try {
             sysLog = AppLogger.system(SYSTEM_LOG);
             final AppLogger log = sysLog;
             log.info("MovieHub started.");
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/movies", new MoviesHandler(ms, sysLog));
-
         } catch (LogFileException e) {
             System.err.println("Ошибка работы с лог-файлом: " + e.getMessage());
             throw new RuntimeException("Ошибка работы с лог-файлом: " + e.getMessage());
@@ -47,5 +47,9 @@ public class MoviesServer {
         }
 
         System.out.println("Сервер остановлен");
+    }
+
+    public void clearStore() {
+        this.ms.clear();
     }
 }

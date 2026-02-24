@@ -29,6 +29,12 @@ public class MoviesHandler extends BaseHttpHandler {
         this.sysLog = log;
     }
 
+    public MoviesHandler(AppLogger log) {
+        super();
+        this.store = new MoviesStore();
+        this.sysLog = log;
+    }
+
     @Override
     public void handle(HttpExchange ex) throws IOException {
         try {
@@ -200,9 +206,8 @@ public class MoviesHandler extends BaseHttpHandler {
     }
 
     private void handleDeleteMovie(HttpExchange ex, long id) throws IOException {
-        boolean deleted = store.delete(id);
-        if (!deleted) {
-            //sendError(ex, 404, "Фильм не найден");
+        if (!store.delete(id)) {
+            sendError(ex, 404, "Фильм не найден");
             return;
         }
         sendNoContent(ex);
